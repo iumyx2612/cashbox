@@ -32,12 +32,11 @@ EXAMPLE = """giải khát công viên cùng bạn hai hôm trước tám trăm
 
 GEN_FORMAT_SYSTEM_STR = """You're a money manager assistant.
 Your job is to extract necessary cash flow information from provided sentence
-Note that today is {day}
 Please ALWAYS response in Python JSON format and in the same language as user
 Example:
 {example}"""
 
-GEN_FORMAT_USER_STR = """{sentence}"""
+GEN_FORMAT_USER_STR = """{sentence}\nNote that today is {day}"""
 
 GEN_FORMAT_SYSTEM_PROMPT = ChatMessage(
     content=GEN_FORMAT_SYSTEM_STR,

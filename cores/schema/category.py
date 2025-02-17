@@ -10,7 +10,7 @@ class CashCategory(BaseModel):
         description="Money used for food"
     )
     commute: Optional[Literal[
-        "Xăng xe", "Gửi xe", "Bảo hiểm xe", "Thuê xê", "Sửa chữa xe"
+        "Xăng xe", "Gửi xe", "Bảo hiểm xe", "Thuê xe", "Sửa chữa xe"
     ]] = Field(
         default=None,
         description="Money related to commute"

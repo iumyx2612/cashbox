@@ -20,9 +20,9 @@ class OpenAI(LIOpenAI):
     @property
     def metadata(self) -> LLMMetadata:
         return LLMMetadata(
-            context_window=openai_modelname_to_contextsize(self._get_model_name()),
+            context_window=1600, # Fixed for Finetuned Qwen. Doesn't matter anw
             num_output=self.max_tokens or -1,
-            is_chat_model=is_chat_model(model=self._get_model_name()),
+            is_chat_model=True,
             is_function_calling_model=False,
             model_name=self.model,
             # TODO: Temp for O1 beta

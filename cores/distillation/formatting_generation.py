@@ -1,20 +1,22 @@
-from typing import Optional, Tuple, Type
+from typing import Optional, Tuple, Type, Union
 
-from llama_index.core.llms import LLM
 from llama_index.core.bridge.pydantic import BaseModel
 from llama_index.core.output_parsers import PydanticOutputParser
 from llama_index.core.prompts import ChatMessage
 
+from cores.llms.structured_llm import StructuredLLM
+
 
 def formatting_generate(
-        llm: LLM,
+        sllm: StructuredLLM,
         pydantic_model: Type[BaseModel],
         output_parser_cls: Type[PydanticOutputParser],
         system_prompt: str,
         user_prompt: str,
         system_kwargs: Optional[dict] = None,
         user_kwargs: Optional[dict] = None,
-) -> Tuple[str, str, str]:
+        parse: bool = False
+) -> Tuple[str, str, Union[str, BaseModel]]:
     if system_kwargs and not isinstance(system_prompt, str):
         raise AssertionError
     if user_kwargs and not isinstance(user_prompt, str):
@@ -31,11 +33,9 @@ def formatting_generate(
     output_parser = output_parser_cls(pydantic_model)
     format_str = output_parser.format_string
 
-    sllm = llm.as_structured_llm(pydantic_model)
-    response = sllm.chat([system_prompt, user_prompt])
-
+    response = sllm.chat([system_prompt, user_prompt], parse=parse)
     system_str = f"{system_prompt.content}\n{format_str}"
     user_str = user_prompt.content
-    output_format = response.message.content
+    output_format = response.raw
 
     return (system_str, user_str, output_format)
