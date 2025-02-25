@@ -1,38 +1,12 @@
 from tqdm import tqdm
 import pandas as pd
-import json
 
 from llama_index.core.prompts import ChatMessage
 
 from cores.llms.structured_llm import StructuredLLM
 from cores.prompts.gen_json import GEN_FORMAT_SYSTEM_STR, EXAMPLE
 from cores.utils import filter_example_block, filter_json_markdown
-
-
-def accuracy(
-        pred_json,
-        gt_json
-) -> float:
-    # Slowest accuracy calculator ever
-    pred_dict: dict = json.loads(pred_json)
-    gt_dict: dict = json.loads(gt_json)
-
-    total_items = len(gt_dict.items())
-    acc = total_items
-
-    keys = ["spent_or_received", "category", "when", "object", "who", "value"]
-
-    # TODO: Stupid, need fix
-    for k in keys:
-        pred_v = pred_dict.get(k, None)
-        gt_v = gt_dict.get(k, None)
-
-        if pred_v != gt_v:
-            acc -= 1
-
-    acc = acc / total_items
-
-    return acc
+from .metrics import accuracy
 
 
 def validate_model(

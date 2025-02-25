@@ -21,11 +21,12 @@ def format_autotrain_sft(
         input_file: str,
         output_file: str
 ) -> None:
-    df = pd.read_csv(input_file, encoding="utf-8")
+    df = pd.read_csv(input_file, encoding="utf-8").dropna()
     new_df = pd.DataFrame()
     for i in range(len(df)):
         sample = df.iloc[i]
         system_prompt = filter_example_block(sample["system"])
+        system_prompt = system_prompt.replace("\n\n\n", "\n")
         user_prompt = sample["user"]
         assistant_prompt = sample["json"]
         combined_string = [
