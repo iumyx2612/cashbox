@@ -5,6 +5,15 @@ import matplotlib.pyplot as plt
 from .utils import get_noted_day, get_mentioned_day
 
 
+VALUE_KEYWORDS = [
+    "k", "cành", "nghìn", "ngàn",
+    "chục", "sịch", "xị", "sọi",
+    "trăm", "lít", "loét", "lốp", "lip", "líp", "list",
+    "triệu", 'm', "mê", "củ", "chai", "trai",
+    "tỷ", "tỉ", "tỏi"
+]
+
+
 DAY_MAPPING_MATRIX = {
     "hai": 0,
     "ba": 1,
@@ -47,3 +56,24 @@ def day_interaction_matrix(
             ax.text(j, i, f"{matrix[i, j]}", ha='center', va='center', color='white')
 
     plt.savefig(output_img_path)
+
+
+def money_keyword_counter(
+        input_file: str,
+        output_file: str
+) -> None:
+    df = pd.read_csv(input_file).dropna()
+    kw_counter = {kw: 0 for kw in VALUE_KEYWORDS}
+
+    for i in range(len(df)):
+        sample = df.iloc[i]["user"]
+        for kw in VALUE_KEYWORDS:
+            if kw in sample:
+                kw_counter[kw] += 1
+
+    values = list(kw_counter.values())
+    plt.figure(figsize=(20, 5))
+    plt.bar(VALUE_KEYWORDS, values)
+    plt.title("Money kw")
+
+    plt.savefig(output_file)

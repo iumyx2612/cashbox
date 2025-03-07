@@ -2,6 +2,8 @@ import re
 
 
 def filter_query(query: str) -> str:
+    """ Remove punctuation at the beginning of sentence. Useful
+    when using with generic_generate """
     query = re.sub(r"^\d+\.\s*|-+\s*|\n", "", query)
     query = query.strip()
     return query
