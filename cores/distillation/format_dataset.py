@@ -2,14 +2,17 @@ import pandas as pd
 from tqdm import tqdm
 import json
 import random
-
+import os
+import sys
+from pathlib import Path    
+sys.path.append(str(Path(__file__).resolve().parents[2]))
 from llama_index.core.llms import LLM
 
 from cores.distillation.generic_generation import generic_generate
 from cores.distillation.formatting_generation import formatting_generate
 from cores.output_parser.vi_pydantic import ViPydanticOutputParser
 from cores.prompts.gen_json import GEN_FORMAT_SYSTEM_STR
-from cores.prompts.gen_value import GEN_VALUE_SYSTEM_PROMPT, GEN_VALUE_USER_PROMPT
+from cores.prompts.gen_value import GEN_VALUE_SYSTEM_PROMPT, GEN_VALUE_USER_PROMPT, GEN_VALUE_SYSTEM_WITHOUT_EXM
 from cores.prompts.gen_time import GEN_TIME_SYSTEM, GEN_TIME_USER, EXAMPLE, DAY_MAPPING
 from cores.utils import filter_example_block
 from cores.schema.category import CashCategory
@@ -78,11 +81,60 @@ def category_to_pydantic(
         else:
             raise ValueError
         # TODO: write more logic later
-    else:
-        raise ValueError
-
+    elif category == "Dịch vụ sinh hoạt": 
+        if subcategory == 'Điện': 
+            model = CashCategory(living_expense='Tiền điện')
+        else: 
+            raise  ValueError
+    
     return model
 
+
+def change_examples_for_each_value(_value: str): 
+ 
+    tmp = None
+    value_name = None 
+    million = ["triệu", 'm', "mê", "củ", "chai", "trai"]
+    thousand = ["k", "cành", "nghìn", "ngàn"]
+    ten_thousand = ["chục", "sịch", "xị", "sọi"]
+    hundred_thousand = ["trăm", "lít", "loét", "lốp", "lip", "líp", "list"]
+    billion = ["tỷ", "tỉ", "tỏi"]
+    for i in million: 
+        if i in _value: 
+            tmp = 10**6
+            value_name = i
+            break
+    for i in thousand:
+        if i in _value:
+            tmp = 10**3
+            value_name = i
+            break
+    
+    for i in ten_thousand:
+        if i in _value:
+            tmp = 10**4
+            value_name = i
+            break
+    
+    for i in hundred_thousand:
+        if i in _value:
+            tmp = 10**5
+            value_name = i
+            break
+    
+    for i in billion:
+        if i in _value:
+            tmp = 10**9
+            value_name = i
+            break
+    
+    if tmp is None:
+        raise ValueError("Value not found")
+    
+    few_shot = "nộp tiền thuê mặt bằng quán cà phê tháng này tổng 3 chai 2".replace("chai", value_name)
+    answer = int(3.2*tmp)
+    EXAMPLE = f"\nExample:\n{few_shot}\nOutput: {answer}"  
+    return GEN_VALUE_SYSTEM_WITHOUT_EXM + EXAMPLE
 
 def convert_zalo(
         input_file: str,
@@ -94,9 +146,16 @@ def convert_zalo(
     out_df = pd.DataFrame()
 
     for data in tqdm(datas):
-        sentence, type, category, subcategory, object, who, _value = \
-            (data["content"], data["type"], data["category"],
-             data["subcategory"], data["object"], data["who"], data["value"])
+        # sentence, type, category, subcategory, object, who, _value = \
+        #     (data["content"], data["type"], data["category"],
+        #      data["subcategory"], data["object"], data["who"], data["value"])
+        sentence = data.get("content", None) 
+        type = data.get("type", None)
+        category = data.get("category", None)
+        subcategory = data.get("subcategory", None)
+        object = data.get("object", None)
+        who = data.get("who", None)
+        _value = data.get("value", None)
 
         if type == "chi":
             spent = True
@@ -107,6 +166,7 @@ def convert_zalo(
         cash_category = cash_category.model_dump(exclude_none=True)
 
         try:
+            GEN_VALUE_SYSTEM_PROMPT.content = change_examples_for_each_value(_value)
             value = generic_generate(
                 llm,
                 GEN_VALUE_SYSTEM_PROMPT,
