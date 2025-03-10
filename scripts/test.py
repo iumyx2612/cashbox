@@ -1,33 +1,25 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer
+import pandas as pd
+import ast
+import json
+df = pd.read_csv('format_data/money_v1.csv')
 
-model_name = "Qwen/Qwen2.5-7B-Instruct"
+df = df['text'].tolist()
+# print(df[:1])
 
-model = AutoModelForCausalLM.from_pretrained(
-    model_name,
-    torch_dtype="auto",
-    device_map="cpu"
-)
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-
-prompt = "Give me a short introduction to large language model."
-messages = [
-    {"role": "system", "content": "You are Qwen, created by Alibaba Cloud. You are a helpful assistant."},
-    {"role": "user", "content": prompt}
-]
-text = tokenizer.apply_chat_template(
-    messages,
-    tokenize=False,
-    add_generation_prompt=True
-)
-model_inputs = tokenizer([text], return_tensors="pt").to(model.device)
-
-generated_ids = model.generate(
-    **model_inputs,
-    max_new_tokens=512
-)
-generated_ids = [
-    output_ids[len(input_ids):] for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
-]
-
-response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
-print(response)
+new_df = []
+for i in df: 
+    try: 
+        row = ast.literal_eval(i)
+        value = int(float(str(row[-1]['content'])))
+        _row = [row[0]['content'], row[1]['content'], value] 
+        new_df = new_df + [_row]
+        # row[-1]['content'] = f'{(int(float(str(row[-1]['content']))))}'
+        # _row = json.dumps(row)
+        # # print(_row)
+        # new_df.append((_row))  # Convert row to string before appending
+    except: 
+        print(i)
+     
+# save to csv with columns = ['system', 'user', 'json']
+new_df = pd.DataFrame(new_df, columns=['system', 'user', 'json'])
+new_df.to_csv('format_data/money_v1_formatted.csv', index=False, encoding="utf-8")
