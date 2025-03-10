@@ -6,10 +6,10 @@ from .utils import get_noted_day, get_mentioned_day
 
 
 VALUE_KEYWORDS = [
-    "k", "cành", "nghìn", "ngàn",
+    " k ", "cành", "nghìn", "ngàn", " k.",
     "chục", "sịch", "xị", "sọi",
     "trăm", "lít", "loét", "lốp", "lip", "líp", "list",
-    "triệu", 'm', "mê", "củ", "chai", "trai",
+    "triệu", ' m ', " mê", "củ", "chai", "trai", ' m.',
     "tỷ", "tỉ", "tỏi"
 ]
 
