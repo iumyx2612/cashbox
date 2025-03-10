@@ -3,3 +3,7 @@ data/
 .idea/
 *.pyc
 __pycache__/
+*.xlsx
+*.csv
+*.json
+*.txt
