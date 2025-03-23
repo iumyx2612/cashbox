@@ -22,51 +22,21 @@ llm = OpenAI(
 
 
 CATEGORY_EXAMPLE_MAPPING = {
-    "Chứng khoán": {
-        "mờ": [
+    "Quần áo": {
+        "loét mean hundred thousand": [
             [], # trường hợp dễ
             [
-                "Chi tiền đi chơi hết 5 mờ", 
-                "Đi hồ tây tiêu hết 1 mê", 
-                "Mua đồ khi đi du lịch hết m 8", 
-                "Chơi ở bà rịa vũng tàu hết m mốt",
-                "Tiêu tiền đi chơi mờ rưỡi", 
-                "Tiêu hết 6 chai 2 mươi nghìn đồng để đi chơi",
-                "Hết 6 trai 8 mươi 2 để đi công viên",
-                "Vào spa tiêu hết 2 củ 80 nghìn", 
-                "Chi tiền chơi giải trí hết 2 mờ 2", 
-                "Sang trung quốc chơi hết 20 củ 6 trăm", 
-                "Vào Miền Nam chơi tháng 8 hết 8 củ tư", 
-                "Chi 1 củ không trăm linh 2 nghìn để đi sang chơi ở Hải Phòng", 
-                "Tiêu hết 2 củ linh tư để đi chơi game online",
-                "Vào sảng chơi pocker mất 78 chai 6 cành", 
-                "Đi chơi ở kangnam hết 890 chai 54 cành", 
+                "Ra chợ đồng xuân mua hết mờ tư",
+                "Đi lên phố ra quán chị Ba mua áo mất mờ 6"
             ] # trường hợp khó
-        ]
-        # "linh": [
-        #     [], # trường hợp dễ
-        #     [   
-        #         "Chi tiền đánh quỹ hết năm mươi 3 chai 2 chục",
-        #     ]
-        # ]
+        ],
+        
     }
 }
 
 SYSTEM_MSG = ("You are a money manager assistant.\n"
                  "These under examples are sentences about spending money of value {value} VND for {subcategory}\n"
                  "Please generate 10 sentences that have value of {value} VND for {subcategory} similar to the examples.\n"
-                 """Note that:
-- The keywords ["triệu", 'm', "mê", "củ", "chai", "trai"] represent money with value of million
-- The keywords ["trăm", "lít", "loét", "lốp", "lip", "líp", "list"] represent money with value of hundred thousand
-- The keywords ["chục", "sịch", "xị", "sọi"] represent money with value of ten thousand
-- The keywords ["k", "cành", "nghìn", "ngàn"] represent money with value of thousand
-- The keywords ["tỷ", "tỉ", "tỏi"] represent money with value of billion
-- The keywords ["tư"] represent money with value of 4
-- The keywords ["mốt"] represent money with value of 1
-- The keywords ["linh"] represent money with value of 0
-- The keywords ["không"] represent money with value of 0
-- The keywords ["trăm"] represent money with value of 100
-"""
                  "EXAMPLES:\n{example}")
 USER_MSG = "Similar sentences:\n"
 
@@ -85,7 +55,7 @@ for subcategory, value in CATEGORY_EXAMPLE_MAPPING.items():
             if sample: # tránh list rỗng
                 example = "\n".join(sample)
                 generated_sentences = ""
-                for _ in range(50): # 500 câu
+                for _ in range(5): # 100 câu
                     responses = generic_generate(
                         llm,
                         SYSTEM_PROMPT,

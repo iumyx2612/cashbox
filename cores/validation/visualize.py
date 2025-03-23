@@ -6,11 +6,11 @@ from .utils import get_noted_day, get_mentioned_day
 
 
 VALUE_KEYWORDS = [
-    " k ", "cành", "nghìn", "ngàn", " k.",
-    "chục", "sịch", "xị", "sọi",
-    "trăm", "lít", "loét", "lốp", "lip", "líp", "list",
-    "triệu", ' m ', " mê", "củ", "chai", "trai", ' m.',
-    "tỷ", "tỉ", "tỏi"
+    " k ", " cành", " nghìn", " ngàn", " k.",
+    " chục", " sịch", " xị", " sọi",
+    " trăm", " lít", " loét", " lốp", " lip", " líp", " list",
+    " triệu", ' m', " mê", " củ", " chai", " trai", ' m.',
+    " tỷ", " tỉ ", " tỏi ", " mốt ", " rưỡi ", " tư "
 ]
 
 
@@ -63,6 +63,7 @@ def money_keyword_counter(
         output_file: str
 ) -> None:
     df = pd.read_csv(input_file).dropna()
+    print(len(df))
     kw_counter = {kw: 0 for kw in VALUE_KEYWORDS}
 
     for i in range(len(df)):
