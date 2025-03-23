@@ -20,5 +20,11 @@
 
 import pandas as pd 
 
-df = pd.read_csv("data/mil (2).csv")   
-df.to_excel('data/mil.xlsx', index=False)
+# path = 'data_baseline_v4/cover_data_250322.xlsx' 
+# df = pd.read_excel(path)
+# df.to_csv('data_baseline_v4/cover_data_250322.csv', index=False, encoding ='utf-8')
+
+
+df = pd.read_csv('data_baseline_v4/baseline_v4_auto_train.csv') 
+
+print(df.info())

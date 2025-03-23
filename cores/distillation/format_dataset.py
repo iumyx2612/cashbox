@@ -91,7 +91,21 @@ def category_to_pydantic(
             model = CashCategory(living_expense='Tiền điện')
         else: 
             raise  ValueError
-    
+    elif category == 'Con cái': 
+        if subcategory == "Bỉm":
+            model = CashCategory(child_care="Tiền bỉm")
+        elif subcategory == "Đồ chơi":
+            model = CashCategory(child_care="Tiền đồ chơi")
+        elif subcategory == "Học phí":
+            model = CashCategory(child_care="Học phí")
+        elif subcategory == "Sữa": 
+            model = CashCategory(child_care="Tiền sữa")
+        elif subcategory == "Tiền tiêu vặt":
+            model = CashCategory(child_care="Tiền tiêu vặt")
+        elif subcategory == "Trông trẻ":
+            model = CashCategory(child_care="Trông trẻ")
+        else:
+            raise ValueError
     return model
 
 
@@ -134,7 +148,10 @@ def change_examples_for_each_value(_value: str):
             break
     
     if tmp is None:
-        raise ValueError("Value not found")
+        # raise ValueError("Value not found")
+        print("Change examples for each value error")
+        value_name = 'chai'
+        tmp = 10**6
     
     few_shot = "nộp tiền thuê mặt bằng quán cà phê tháng này tổng 3 chai 2".replace("chai", value_name)
     answer = int(3.2*tmp)
@@ -181,8 +198,12 @@ def convert_zalo(
                     example=get_example(sentence)
                 )
             )
-        except:
+        except Exception as e:
+            print(sentence)
+            print(f"Error in value generation: {e}")
             continue
+            
+            
 
         sllm = llm.as_structured_llm(TimeInformation)
         day = DAY_MAPPING[random.randint(0, 6)]
@@ -202,7 +223,9 @@ def convert_zalo(
                 ),
                 parse=True
             )
-        except:
+        except Exception as e:
+            print(sentence)
+            print(f"Error in time generation: {e}")
             continue
         time_json = time_pydantic.model_dump()
 
