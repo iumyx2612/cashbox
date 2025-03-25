@@ -12,13 +12,13 @@ from tqdm import tqdm
 llm = OpenAI(
     api_base="http://10.0.4.239:8010/v1",
     api_key="emansieuvc", 
-    model="/qwen-baseline-money-v5", 
+    model="/qwen-baseline-money-v6", 
 )
 
-save_folder = 'data_category/converted_category'
+save_folder = 'data_category/converted_category/Hiếu hỉ, biếu tặng'
 
-for folder in tqdm(os.listdir("data_category/5xxx_concai")):
-    folder_path = os.path.join("data_category/5xxx_concai", folder)
+for folder in tqdm(os.listdir("data_category/Hiếu hỉ, biếu tặng")):
+    folder_path = os.path.join("data_category/Hiếu hỉ, biếu tặng", folder)
     # check if file is an folder 
     if os.path.isdir(folder_path):
         

@@ -21,13 +21,13 @@ client = OpenAI(
     api_key="emansieuvc"
 )
 
-user_prompt = "5 ly nước ngọt 75.000 VNĐ trong bữa tiệc vào thứ hai."
+user_prompt = "5 ly nước ngọt 75.000 VNĐ trong bữa tiệc vào thứ năm."
 
 completion = client.chat.completions.create(
   model="/qwen-baseline-money-v5",
   messages=[
     {"role": "system", "content": GEN_TIME_SYSTEM.format(example=EXAMPLE)},
-    {"role": "user", "content": GEN_TIME_USER.format(sentence=user_prompt, day="Thứ năm")}
+    {"role": "user", "content": GEN_TIME_USER.format(sentence=user_prompt, day="Thứ hai")}
   ],
   temperature=0
 )

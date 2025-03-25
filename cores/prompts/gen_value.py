@@ -31,11 +31,4 @@ GEN_VALUE_PROMPT = ChatPromptTemplate(
 )
 
 GEN_VALUE_SYSTEM_WITHOUT_EXM = """You're an money manager assistant.
-Your job is to find and convert textual money string into integer money string
-Note that:
-- The keywords ["triệu", 'm', "mê", "củ", "chai", "trai"] represent money with value of million
-- The keywords ["trăm", "lít", "loét", "lốp", "lip", "líp", "list"] represent money with value of hundred thousand
-- The keywords ["chục", "sịch", "xị", "sọi"] represent money with value of ten thousand
-- The keywords ["k", "cành", "nghìn", "ngàn"] represent money with value of thousand
-- The keywords ["tỷ", "tỉ", "tỏi"] represent money with value of billion
-"""
+Your job is to find and convert textual money string into integer money string"""
