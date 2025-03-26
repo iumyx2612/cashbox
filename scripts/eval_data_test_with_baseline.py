@@ -21,16 +21,16 @@ Here's a JSON schema to follow:
 Output a valid JSON object but do not repeat the schema.
 """
 
-# client = OpenAI(
-#     base_url="http://10.0.4.239:8010/v1",
-#     api_key="emansieuvc"
-# )
-
 client = OpenAI(
-    base_url="http://10.0.7.50:8011/v1",
+    base_url="http://10.0.4.239:8010/v1",
     api_key="emansieuvc"
 )
-model_name = '/qwen-baseline-money-v5'
+
+# client = OpenAI(
+#     base_url="http://10.0.7.50:8011/v1",
+#     api_key="emansieuvc"
+# )
+model_name = '/qwen-baseline-money-v6-1'
 
 def predict_task_all(sentence: str): 
     day = "Thứ hai"
@@ -74,7 +74,7 @@ for index, row in tqdm(df.iterrows(), total=df.shape[0]):
     except Exception as e:
         print(e)
 
-df.to_excel('data_test/data_test_output_v2.xlsx', index=False, engine='xlsxwriter')  
+df.to_excel('data_test/data_test_output_model-v6-1.xlsx', index=False, engine='xlsxwriter')  
 
 if len(acc) > 0:
     print("Mean: ", sum(acc)/len(acc))
