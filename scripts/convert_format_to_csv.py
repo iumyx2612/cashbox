@@ -2,16 +2,19 @@ import pandas as pd
 
 
 list_file = [
-    'money_data_v2/money_v2.csv', 
-    'money_data_v2/bil_data.csv', 
-    'money_data_v2/mil_new.csv', 
+'data_baseline_v4/baseline_v3.csv', 
+'data_baseline_v4/5xxx_concai.csv', 
+'data_baseline_v4/cover_data_250322.csv', 
 ]
 
 
 df = pd.DataFrame(columns=['system', 'user', 'json'])
 
 for file in list_file:
-    df_tmp = pd.read_csv(file) 
+    print(file)
+    df_tmp = pd.read_csv(file)
+    # just get 3 columns: system, user, json
+    df_tmp = df_tmp[['system', 'user', 'json']]
     # remove header 
     df_tmp = df_tmp.iloc[1:]
     # remove empty lines
@@ -21,4 +24,4 @@ for file in list_file:
     # concat df_tmp to df
     df = pd.concat([df, df_tmp], ignore_index=True)
 
-df.to_csv('money_data_v2/money_v3.csv', index=False)
+df.to_csv('data_baseline_v4/baseline_v4.csv', index=False, encoding='utf-8')
