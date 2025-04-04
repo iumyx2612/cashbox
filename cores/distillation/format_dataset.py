@@ -8,9 +8,12 @@ from llama_index.core.llms import LLM
 from cores.distillation.generic_generation import generic_generate
 from cores.distillation.formatting_generation import formatting_generate
 from cores.output_parser.vi_pydantic import ViPydanticOutputParser
+
 from cores.prompts.gen_json import GEN_FORMAT_SYSTEM_STR
-from cores.prompts.gen_value import GEN_VALUE_SYSTEM_PROMPT, GEN_VALUE_USER_PROMPT
+from cores.prompts.value.value_schema import GEN_VALUE_SYSTEM_PROMPT, GEN_VALUE_USER_PROMPT, get_example
 from cores.prompts.gen_time import GEN_TIME_SYSTEM, GEN_TIME_USER, EXAMPLE, DAY_MAPPING
+from cores.prompts.time.time import REASONING_SYSTEM_PROMPT, JSON_SYSTEM_PROMPT
+
 from cores.utils import filter_example_block
 from cores.schema.category import CashCategory
 from cores.schema.time import TimeInformation
@@ -29,6 +32,8 @@ def format_autotrain_sft(
         system_prompt = system_prompt.replace("\n\n\n", "\n")
         user_prompt = sample["user"]
         assistant_prompt = sample["json"]
+        if not isinstance(assistant_prompt, str):
+            assistant_prompt = int(assistant_prompt)
         combined_string = [
             {"content": system_prompt, "role": "system"},
             {"content": f"{user_prompt}", "role": "user"},
@@ -112,7 +117,8 @@ def convert_zalo(
                 GEN_VALUE_SYSTEM_PROMPT,
                 GEN_VALUE_USER_PROMPT,
                 prompt_kwargs=dict(
-                    money=_value
+                    sentence=_value,
+                    example=get_example(sentence)
                 )
             )
         except:
@@ -163,3 +169,32 @@ def convert_zalo(
         }, ignore_index=True)
 
     out_df.to_csv(output_file, index=False)
+
+
+def convert_time_dataset(
+        input_file: str,
+        reasoning_output_file: str,
+        json_output_file: str
+) -> None:
+    input_df = pd.read_csv(input_file)
+    reasoning_out = pd.DataFrame()
+    json_out = pd.DataFrame()
+
+    for i in range(len(input_df)):
+        user_prompt = input_df.iloc[i]["user"]
+        reasoning = input_df.iloc[i]["reasoning"]
+        json_str = input_df.iloc[i]["json"]
+
+        reasoning_out = reasoning_out._append({
+            "system": REASONING_SYSTEM_PROMPT,
+            "user": user_prompt,
+            "json": reasoning
+        }, ignore_index=True)
+        json_out = json_out._append({
+            "system": JSON_SYSTEM_PROMPT,
+            "user": user_prompt,
+            "json": f"```json\n{json_str}\n```"
+        }, ignore_index=True)
+
+    reasoning_out.to_csv(reasoning_output_file, index=False)
+    json_out.to_csv(json_output_file, index=False)

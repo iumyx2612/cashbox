@@ -9,6 +9,6 @@ class TimeInformation(BaseModel):
     )
     relative_date: int = Field(
         default=0,
-        description="How many days from today to said day. Use default value if not mentioned",
+        description="How many days from today to mentioned day. Use default value if not mentioned",
         le=0
     )

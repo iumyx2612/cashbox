@@ -45,8 +45,10 @@ def day_interaction_matrix(
             noted_day = get_noted_day(sample)
             if noted_day.lower() != "chủ nhật":
                 noted_day = noted_day.split()[-1]
-
-            matrix[DAY_MAPPING_MATRIX[mentioned_day.lower()], DAY_MAPPING_MATRIX[noted_day.lower()]] += 1
+            try:
+                matrix[DAY_MAPPING_MATRIX[mentioned_day.lower()], DAY_MAPPING_MATRIX[noted_day.lower()]] += 1
+            except:
+                continue
 
     fig, ax = plt.subplots()
     cax = ax.imshow(matrix)

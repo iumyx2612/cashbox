@@ -1,4 +1,5 @@
 import re
+from llama_index.core.output_parsers.utils import extract_json_str as filter_json_markdown
 
 
 def filter_query(query: str) -> str:
@@ -13,6 +14,6 @@ def filter_example_block(query: str) -> str:
     return re.sub(r'Example:.*?```.*?```', '', query, flags=re.DOTALL).strip()
 
 
-def filter_json_markdown(query: str) -> str:
-    match = re.search(r'^```json\n(.*?)\n```$', query, re.DOTALL)
-    return match.group(1) if match else ""
+# def filter_json_markdown(query: str) -> str:
+#     match = re.search(r'^```json\n(.*?)\n```$', query, re.DOTALL)
+#     return match.group(1) if match else ""
