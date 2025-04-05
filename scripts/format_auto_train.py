@@ -7,6 +7,6 @@ from cores.distillation.format_dataset import format_autotrain_sft
 
 
 format_autotrain_sft(
-    'data_baseline_v4/value_data_v3.csv', 
-    'data_baseline_v4/value_data_v3_autotrain.csv'
+    'data_baseline_v4/baseline_v5.csv', 
+    'data_baseline_v4/baseline_v5_autotrain.csv'
 )

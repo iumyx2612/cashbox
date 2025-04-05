@@ -8,15 +8,15 @@ import os
 GEN_VALUE_SYSTEM_WITHOUT_EXM = """You're an money manager assistant.
 Your job is to find and convert textual money string into integer money string"""
 
-client = OpenAI(
-    base_url="http://10.0.4.239:8010/v1",
-    api_key="emansieuvc"
-)
-
 # client = OpenAI(
-#     base_url="http://10.0.7.50:8011/v1",
+#     base_url="http://10.0.4.239:8010/v1",
 #     api_key="emansieuvc"
 # )
+
+client = OpenAI(
+    base_url="http://10.0.7.50:8011/v1",
+    api_key="emansieuvc"
+)
 
 
 df = pd.read_excel('data_test/data_test.xlsx')
@@ -28,7 +28,7 @@ for index, row in tqdm(df.iterrows(), total=df.shape[0]):
         user_prompt = f"{sentence.rstrip('\n')}"
         
         completion = client.chat.completions.create(
-            model="/qwen-baseline-money-v5",
+            model="/qwen-baseline-money-v6-0",
             messages=[
                 {"role": "system", "content": GEN_VALUE_SYSTEM_WITHOUT_EXM},
                 {"role": "user", "content": user_prompt}
