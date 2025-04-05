@@ -109,54 +109,54 @@ def category_to_pydantic(
     return model
 
 
-def change_examples_for_each_value(_value: str): 
+# def change_examples_for_each_value(_value: str): 
  
-    tmp = None
-    value_name = None 
-    million = ["triệu", 'm', "mê", "củ", "chai", "trai"]
-    thousand = ["k", "cành", "nghìn", "ngàn"]
-    ten_thousand = ["chục", "sịch", "xị", "sọi"]
-    hundred_thousand = ["trăm", "lít", "loét", "lốp", "lip", "líp", "list"]
-    billion = ["tỷ", "tỉ", "tỏi"]
-    for i in million: 
-        if i in _value: 
-            tmp = 10**6
-            value_name = i
-            break
-    for i in thousand:
-        if i in _value:
-            tmp = 10**3
-            value_name = i
-            break
+#     tmp = None
+#     value_name = None 
+#     million = ["triệu", 'm', "mê", "củ", "chai", "trai"]
+#     thousand = ["k", "cành", "nghìn", "ngàn"]
+#     ten_thousand = ["chục", "sịch", "xị", "sọi"]
+#     hundred_thousand = ["trăm", "lít", "loét", "lốp", "lip", "líp", "list"]
+#     billion = ["tỷ", "tỉ", "tỏi"]
+#     for i in million: 
+#         if i in _value: 
+#             tmp = 10**6
+#             value_name = i
+#             break
+#     for i in thousand:
+#         if i in _value:
+#             tmp = 10**3
+#             value_name = i
+#             break
     
-    for i in ten_thousand:
-        if i in _value:
-            tmp = 10**4
-            value_name = i
-            break
+#     for i in ten_thousand:
+#         if i in _value:
+#             tmp = 10**4
+#             value_name = i
+#             break
     
-    for i in hundred_thousand:
-        if i in _value:
-            tmp = 10**5
-            value_name = i
-            break
+#     for i in hundred_thousand:
+#         if i in _value:
+#             tmp = 10**5
+#             value_name = i
+#             break
     
-    for i in billion:
-        if i in _value:
-            tmp = 10**9
-            value_name = i
-            break
+#     for i in billion:
+#         if i in _value:
+#             tmp = 10**9
+#             value_name = i
+#             break
     
-    if tmp is None:
-        # raise ValueError("Value not found")
-        print("Change examples for each value error")
-        value_name = 'chai'
-        tmp = 10**6
+#     if tmp is None:
+#         # raise ValueError("Value not found")
+#         print("Change examples for each value error")
+#         value_name = 'chai'
+#         tmp = 10**6
     
-    few_shot = "nộp tiền thuê mặt bằng quán cà phê tháng này tổng 3 chai 2".replace("chai", value_name)
-    answer = int(3.2*tmp)
-    EXAMPLE = f"\nExample:\n{few_shot}\nOutput: {answer}"  
-    return GEN_VALUE_SYSTEM_WITHOUT_EXM + EXAMPLE
+#     few_shot = "nộp tiền thuê mặt bằng quán cà phê tháng này tổng 3 chai 2".replace("chai", value_name)
+#     answer = int(3.2*tmp)
+#     EXAMPLE = f"\nExample:\n{few_shot}\nOutput: {answer}"  
+#     return GEN_VALUE_SYSTEM_WITHOUT_EXM + EXAMPLE
 
 def convert_zalo(
         input_file: str,

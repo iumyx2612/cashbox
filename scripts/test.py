@@ -1,25 +1,19 @@
 import pandas as pd 
+import os
 
-path = 'data/data_baseline_v8/baseline_v8_category.csv'
-# path = 'data/time_reasoning/data_time_reasoning.csv'
-df = pd.read_csv(path)
+path = 'data/time_reasoning/function_calling'
 
-row = df.iloc[0]
-num_rangdom_rows = 10
-new_df = pd.DataFrame(columns=df.columns)
-# print(row['json'])
-for i in range(20):
-    filter_value = f'"relative_date": -{i}' if i > 0 else '"relative_date": 0'
-    filtered_df = df[df['json'].str.contains(filter_value, na=False)]
-    # print(f'filtered_df for {i} : {len(filtered_df)}:')
-    # get random num rangdom rows from filtered_df
-    if len(filtered_df) >= num_rangdom_rows:
-        filtered_df_random = filtered_df.sample(n=num_rangdom_rows, random_state=2)
-    else:
-        filtered_df_random = filtered_df.sample(n=len(filtered_df), random_state=2)
-    print(f'filtered_df_random for {len(filtered_df_random)}:')
+new_df = pd.DataFrame(columns=['system', 'user', 'json', 'answer'])
+for file in os.listdir(path): 
+    print(file)
+    if file.endswith('.csv'):
+        file_path = os.path.join(path, file)
+        df = pd.read_csv(file_path)
+        # remove headers
+        df = df.iloc[1:]
+        print(len(df)) 
+        new_df = pd.concat([new_df, df], ignore_index=True)
 
-    new_df = pd.concat([new_df, filtered_df_random], ignore_index=True)
-
+new_df.to_csv('data/time_reasoning/function_calling.csv', index=False, encoding='utf-8')
 print(len(new_df))
-new_df.to_csv('data/data_baseline_v8/baseline_v8_category_random.csv', index=False)
+
