@@ -1,5 +1,13 @@
 from openai import OpenAI
-
+import pandas as pd 
+import pandas as pd
+import json
+import os
+import sys
+from pathlib import Path    
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+from cores.utils import filter_json_markdown
+from tqdm import tqdm
 BASELINE_SYSTEM_PROMPT = """You're a money manager assistant.
 Your job is to extract necessary cash flow information from provided sentence
 Please ALWAYS response in Python JSON format and in the same language as user
@@ -10,30 +18,55 @@ Here's a JSON schema to follow:
 Output a valid JSON object but do not repeat the schema.
 """
 
-
 client = OpenAI(
-    base_url="http://10.0.4.239:8015/v1",
+    base_url="http://10.0.7.50:8011/v1",
     api_key="emansieuvc"
 )
+model_name = '/qwen-baseline-money-v7-fix'
 
-# client = OpenAI(
-#     base_url="http://10.0.7.50:8011/v1",
-#     api_key="emansieuvc"
-# )
-model_name = '/qwen-baseline-money-v8-1'
+data_path = 'data/fix_value/merged_value.csv'
 
-sentence = "25 tháng 1 chuyển khoản "
-day = "Thứ hai"
 GEN_FORMAT_USER_STR = """{sentence}\nNote that today is {day}"""
 
+def predict_baseline(sentence: str, day: str): 
+    user_prompt = GEN_FORMAT_USER_STR.format(sentence=sentence, day=day)
+    response = client.chat.completions.create(
+        model=model_name,
+        messages=[
+            {"role": "system", "content": BASELINE_SYSTEM_PROMPT},
+            {"role": "user", "content": user_prompt}
+        ], 
+        temperature=0
+    )
 
-completion = client.chat.completions.create(
-  model=model_name,
-  messages=[
-    {"role": "system", "content": BASELINE_SYSTEM_PROMPT},
-    {"role": "user", "content": GEN_FORMAT_USER_STR.format(sentence=sentence, day=day)}
-  ],
-  temperature=0
-)
+    return filter_json_markdown(response.choices[0].message.content), user_prompt
 
-print(completion.choices[0].message.content)    
+df = pd.read_csv(data_path)
+new_df = pd.DataFrame(columns=['system', 'user', 'json'])
+for index, row in tqdm(df.iterrows()):
+    try: 
+        sentence = str(row['user']).strip()
+        # remove \n in sentence
+        sentence = sentence.replace('\n', ' ')
+        value = int(row['json'])
+
+        day = "Thứ hai"
+        
+
+        baseline_str, user_prompt = predict_baseline(sentence, day)
+        baseline_json = json.loads(baseline_str)
+        
+        baseline_json['value'] = value
+        
+        json_str = json.dumps(baseline_json, indent=4, ensure_ascii=False)
+        
+        new_df = new_df._append({
+            "system": BASELINE_SYSTEM_PROMPT,
+            "user": user_prompt,
+            "json": f"""```json\n{json_str}\n```"""
+        }, ignore_index=True)
+    except Exception as e:
+        print(f"Error at index {index}: {e}")
+        continue
+    
+new_df.to_csv('data/fix_value/merged_value_baseline.csv', index=False, encoding='utf-8')

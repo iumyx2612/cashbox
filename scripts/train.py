@@ -1,21 +1,22 @@
 import os
 
 # turn of gpu 0 
-# os.environ["CUDA_VISIBLE_DEVICES"] = "1,2,3"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,3"
 
 from autotrain.params import LLMTrainingParams
 from autotrain.project import AutoTrainProject
 
 
 params = LLMTrainingParams(
-    model="qwen-baseline-money-v5",
+    # model="Qwen/Qwen2.5-7B-Instruct",
+    model="qwen-baseline-money-v8-1", 
     data_path="dataset",
     chat_template="tokenizer",
     model_max_length=1800,
     text_column="text",
     train_split="train",
     trainer="sft",
-    epochs=3,
+    epochs=5,
     batch_size=2,
     lr=1e-5,
     mixed_precision="bf16",
@@ -27,11 +28,11 @@ params = LLMTrainingParams(
     scheduler="cosine",
     gradient_accumulation=8,
     merge_adapter=True,
-    project_name="qwen-baseline-money-v6-0",
+    project_name="qwen-baseline-money-v8-category",
     log="tensorboard",
-    push_to_hub=True,
-    username='anhalu', 
-    token=os.getenv('hf_token'),
+    # push_to_hub=True,
+    # username='anhalu', tm
+    # token=os.getenv('hf_token'),
 )
 
 

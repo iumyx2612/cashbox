@@ -1,4 +1,15 @@
+import pandas as pd
+import json
+import os
+import sys
+from pathlib import Path    
+sys.path.append(str(Path(__file__).resolve().parents[1]))
 from openai import OpenAI
+from cores.prompts.gen_json import GEN_FORMAT_SYSTEM_STR, GEN_FORMAT_USER_STR, DAY_MAPPING, EXAMPLE
+from cores.utils import filter_json_markdown
+from tqdm import tqdm
+import re 
+
 
 BASELINE_SYSTEM_PROMPT = """You're a money manager assistant.
 Your job is to extract necessary cash flow information from provided sentence
@@ -9,7 +20,6 @@ Here's a JSON schema to follow:
 
 Output a valid JSON object but do not repeat the schema.
 """
-
 
 client = OpenAI(
     base_url="http://10.0.4.239:8015/v1",
@@ -22,18 +32,47 @@ client = OpenAI(
 # )
 model_name = '/qwen-baseline-money-v8-1'
 
-sentence = "25 tháng 1 chuyển khoản "
-day = "Thứ hai"
-GEN_FORMAT_USER_STR = """{sentence}\nNote that today is {day}"""
+def predict_task_all(sentence: str): 
+    day = "Thứ hai"
+    user_prompt = GEN_FORMAT_USER_STR.format(sentence=sentence, day=day)
+    response = client.chat.completions.create(
+        model=model_name,
+        messages=[
+            {"role": "system", "content": BASELINE_SYSTEM_PROMPT},
+            {"role": "user", "content": user_prompt}
+        ], 
+        temperature=0
+    )
+
+    return filter_json_markdown(response.choices[0].message.content)
 
 
-completion = client.chat.completions.create(
-  model=model_name,
-  messages=[
-    {"role": "system", "content": BASELINE_SYSTEM_PROMPT},
-    {"role": "user", "content": GEN_FORMAT_USER_STR.format(sentence=sentence, day=day)}
-  ],
-  temperature=0
-)
+df = pd.read_excel('data/data_test/data_test_time.xlsx')
 
-print(completion.choices[0].message.content)    
+acc = []
+for index, row in tqdm(df.iterrows(), total=df.shape[0]):
+    try: 
+        # Task all
+        sentence = row['Example']
+        baseline_task_str = predict_task_all(sentence)
+        baseline_task_dict = json.loads(baseline_task_str)
+        
+        int_output = int(float(baseline_task_dict['value']))
+        
+        true_value = int(float(str(row['Giá trị'])))
+        if int_output != true_value:
+            print(f"input : {sentence}")
+            print("label: ", true_value)
+            print("output model: ", int_output)
+            print("====================")
+        
+        if int_output == true_value:
+            acc.append(1)
+        else:
+            acc.append(0)
+        df.at[index, 'output'] = int_output
+    except Exception as e:
+        print(e)
+
+if len(acc) > 0:
+    print("Mean: ", sum(acc)/len(acc))

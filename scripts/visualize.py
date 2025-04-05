@@ -6,6 +6,6 @@ from cores.validation.visualize import money_keyword_counter
 
 
 money_keyword_counter(
-    '/home/hoang.minh.an/anhalu-data/learning/cashbox/data_baseline_v4/baseline_v5.csv', 
-    'baseline_v5.png'
+    'data/data_baseline_v8/baseline_v8.csv', 
+    'baseline_v8.png'
 )
