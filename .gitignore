@@ -3,3 +3,17 @@ data/
 .idea/
 *.pyc
 __pycache__/
+*.xlsx
+*.csv
+*.json
+*.txt
+*.zip
+*.png
+.DS_Store
+
+model/
+*.safetensors
+*/runs/
+*.model
+*.bin
+*.md

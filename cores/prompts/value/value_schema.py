@@ -17,6 +17,8 @@ EXAMPLES = {
                                     "Output: 3200"
 }
 
+GEN_VALUE_SYSTEM_WITHOUT_EXM = """You're an money manager assistant.
+Your job is to find and convert textual money string into integer money string"""
 
 GEN_VALUE_SCHEMA_SYSTEM = """You're an money manager assistant.
 Your job is to find and convert textual money string into integer money string
