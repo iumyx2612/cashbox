@@ -1,0 +1,64 @@
+version: '3.8'
+
+networks:
+  app-tier:
+    driver: bridge
+
+services:
+  vllm:
+    image: vllm/vllm-openai:latest
+    container_name: vllm_service
+    ports:
+      - "8021:8000"
+    environment:
+      - MODEL_NAME=${BASELINE__MODEL_NAME}
+      - HUGGINGFACE_TOKEN=${HUGGINGFACE__TOKEN}
+    volumes:
+      - type: bind
+        source: ${MODEL_DIR}
+        target: /models
+    command: >
+      python3 -m vllm.entrypoints.openai.api_server
+      --model ${MODEL_NAME}
+      --port 8000
+      --host 0.0.0.0
+      --download-dir /models
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    networks:
+      - app-tier
+    
+    env_file:
+      - .env
+
+  query:
+    build:
+      context: .
+      dockerfile: cores/Dockerfile
+    container_name: query_service
+    ports:
+      - "8020:8020"
+    environment:
+      - BASELINE__BASE_URL=${BASELINE__BASE_URL}
+      - BASELINE__PORT=${BASELINE__PORT}
+      - BASELINE__API_KEY=${BASELINE__API_KEY}
+      - BASELINE__MODEL_NAME=${BASELINE__MODEL_NAME}
+      - TIME__BASE_URL=${TIME__BASE_URL}
+      - TIME__PORT=${TIME__PORT}
+      - TIME__API_KEY=${TIME__API_KEY}
+      - TIME__MODEL_NAME=${TIME__MODEL_NAME}
+    # depends_on:
+    #   - vllm_service
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8020"]
+
+    networks:
+      - app-tier
+    
+    env_file:
+      - .env

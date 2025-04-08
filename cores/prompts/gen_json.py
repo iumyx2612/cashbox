@@ -51,3 +51,9 @@ GEN_FORMAT_USER_PROMPT = ChatMessage(
 GEN_FORMAT_PROMPT = ChatPromptTemplate([
     GEN_FORMAT_SYSTEM_PROMPT, GEN_FORMAT_USER_PROMPT
 ])
+
+
+BASELINE_SYSTEM_STR = """You're a money manager assistant.
+Your job is to extract necessary cash flow information from provided sentence
+Please ALWAYS response in Python JSON format and in the same language as user
+"""

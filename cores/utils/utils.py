@@ -1,5 +1,7 @@
 import re
 from llama_index.core.output_parsers.utils import extract_json_str as filter_json_markdown
+import time
+from functools import wraps
 
 
 def filter_query(query: str) -> str:
@@ -26,3 +28,20 @@ def filter_json_markdown_anywhere(query: str) -> str:
     match = re.search(r'```json\n(.*?)\n```', query, re.DOTALL)
     return match.group(1) if match else ""
 
+
+def time_decorator(predictor_name: str):
+    """
+    Decorator to measure the runtime of a predictor and update the Node's running_time.
+    """
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            start_time = time.time()
+            node = await func(*args, **kwargs)
+            end_time = time.time()
+            runtime = end_time - start_time
+            if node and hasattr(node, 'running_time'):
+                node.running_time[predictor_name] = runtime
+            return node
+        return wrapper
+    return decorator
