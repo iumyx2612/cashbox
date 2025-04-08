@@ -1,7 +1,7 @@
 import os
 
 # turn of gpu 0 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1,3"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 
 from autotrain.params import LLMTrainingParams
 from autotrain.project import AutoTrainProject
@@ -16,7 +16,7 @@ params = LLMTrainingParams(
     text_column="text",
     train_split="train",
     trainer="sft",
-    epochs=5,
+    epochs=20,
     batch_size=2,
     lr=1e-5,
     mixed_precision="bf16",
@@ -28,7 +28,7 @@ params = LLMTrainingParams(
     scheduler="cosine",
     gradient_accumulation=8,
     merge_adapter=True,
-    project_name="qwen-time-function-calling-v1",
+    project_name="qwen-time-function-calling-v2",
     log="tensorboard",
     # push_to_hub=True,
     # username='anhalu', tm

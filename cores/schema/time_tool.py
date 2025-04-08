@@ -8,8 +8,8 @@ def calculate_time(
     ],
     mentioned_date: Optional[Literal[
         "Thứ hai", "Thứ ba", "Thứ tư",
-        "Thứ năm", "Thứ sáu", "Thứ bảy", "Chủ Nhật", "Undefine"
-    ]],
+        "Thứ năm", "Thứ sáu", "Thứ bảy", "Chủ Nhật"
+    ]] = None,
     week: Optional[int] = 0,
     absolute_date: Optional[str] = None,
     relative_date: Optional[int] = None
@@ -41,7 +41,7 @@ def calculate_time(
             "absolute_date": None,
             "relative_date": -int(relative_date)
         }
-    if mentioned_date is None or mentioned_date == "Undefine":
+    if mentioned_date is None:
         mentioned_date = today
     
     start_index = DATE_ARRAY.index(today)
@@ -54,11 +54,3 @@ def calculate_time(
         "absolute_date": None,
         "relative_date": -days_diff
     }   
-    
-print(calculate_time(
-    today="Thứ tư",
-    mentioned_date="Thứ ba",
-    week=0,
-    absolute_date=None,
-    relative_date=None
-))

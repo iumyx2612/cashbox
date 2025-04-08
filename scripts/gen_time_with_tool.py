@@ -19,13 +19,18 @@ from cores.prompts.time.time_function import TIME_FUNCTION_SYSTEM, TIME_FUNCTION
 
 load_dotenv()
 
+tool = FunctionTool.from_defaults(
+    fn=calculate_time
+)
+
+
 
 SYSTEM_PROMPT = """You're a money manager assistant.
 Your job is to provide arguments for the tool below to extract and calculate time information
 Note you must use the tool to calculate the time difference between mentioned date and today.
 
 Tool schema:
-{'name': 'calculate_time', 'description': 'calculate_time(today: Literal[\'Thứ hai\', \'Thứ ba\', \'Thứ tư\', \'Thứ năm\', \'Thứ sáu\', \'Thứ bảy\', \'Chủ Nhật\'], mentioned_date: Optional[Literal[\'Thứ hai\', \'Thứ ba\', \'Thứ tư\', \'Thứ năm\', \'Thứ sáu\', \'Thứ bảy\', \'Chủ Nhật\', \'Undefine\']], week: Optional[int] = 0, absolute_date: Optional[str] = None, relative_date: Optional[int] = None)', 'parameters': {'properties': {'today': {'enum': ['Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy', 'Chủ Nhật'], 'title': 'Today', 'type': 'string'}, 'mentioned_date': {'anyOf': [{'enum': ['Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy', 'Chủ Nhật', 'Undefine'], 'type': 'string'}, {'type': 'null'}], 'title': 'Mentioned Date'}, 'week': {'anyOf': [{'type': 'integer'}, {'type': 'null'}], 'default': 0, 'title': 'Week'}, 'absolute_date': {'anyOf': [{'type': 'string'}, {'type': 'null'}], 'default': None, 'title': 'Absolute Date'}, 'relative_date': {'anyOf': [{'type': 'int'}, {'type': 'null'}], 'default': None, 'title': 'Relative Date'}}, 'required': ['today', 'mentioned_date'], 'type': 'object'}} 
+{'name': 'calculate_time', 'description': 'calculate_time(today: Literal[\'Thứ hai\', \'Thứ ba\', \'Thứ tư\', \'Thứ năm\', \'Thứ sáu\', \'Thứ bảy\', \'Chủ Nhật\'], mentioned_date: Optional[Literal[\'Thứ hai\', \'Thứ ba\', \'Thứ tư\', \'Thứ năm\', \'Thứ sáu\', \'Thứ bảy\', \'Chủ Nhật\']] = None, week: Optional[int] = 0, absolute_date: Optional[str] = None, relative_date: Optional[int] = None)', 'parameters': {'properties': {'today': {'enum': ['Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy', 'Chủ Nhật'], 'title': 'Today', 'type': 'string'}, 'mentioned_date': {'anyOf': [{'enum': ['Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy', 'Chủ Nhật'], 'type': 'string'}, {'type': 'null'}], 'default': None, 'title': 'Mentioned Date'}, 'week': {'anyOf': [{'type': 'integer'}, {'type': 'null'}], 'default': 0, 'title': 'Week'}, 'absolute_date': {'anyOf': [{'type': 'string'}, {'type': 'null'}], 'default': None, 'title': 'Absolute Date'}, 'relative_date': {'anyOf': [{'type': 'integer'}, {'type': 'null'}], 'default': None, 'title': 'Relative Date'}}, 'required': ['today'], 'type': 'object'}}}
 """
 llm = OpenAI(
     model="gpt-4o-mini",
@@ -35,8 +40,9 @@ llm = OpenAI(
 )
 
 files = [
-    "data_time_reasoning.csv",
-    'merged_time_absolute.csv',
+    'add_more_special_time.csv'
+    # "data_time_reasoning.csv",
+    # 'merged_time_absolute.csv',
     # "time_sentences_2_5.csv",
     # "time_sentences_1_2.csv",
     # "time_sentences_2_2.csv",
@@ -45,11 +51,6 @@ files = [
     # "time_sentences_5_2.csv",
     # "time_sentences_6_2.csv"
 ]
-
-tool = FunctionTool.from_defaults(
-    fn=calculate_time
-)
-
 
 for file in tqdm(files):
     out_df = pd.DataFrame()

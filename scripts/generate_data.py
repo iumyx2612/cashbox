@@ -22,12 +22,20 @@ llm = OpenAI(
 
 
 CATEGORY_EXAMPLE_MAPPING = {
-    "Quần áo": {
-        "loét mean hundred thousand": [
-            [], # trường hợp dễ
+    "Đi chơi": {
+        "sịch": [
             [
-                "Ra chợ đồng xuân mua hết mờ tư",
-                "Đi lên phố ra quán chị Ba mua áo mất mờ 6"
+                # "Đầu tuần mua một chiếc áo mới 50 cành", 
+                # "Mua một chiếc áo mới hết 10 sịch vào cuối tuần",
+                # "hai hôm trước mua một chiếc áo mới 20 cành",
+                # "Hôm kia mua một chiếc áo mới 30 cành",
+                # "Mua đôi giày mới hết 500 cành vào cuối tuần",
+                # "Mua một chiếc áo mới hết 100 cành hai hôm trước",
+                "Đầu tuần đi chơi ở Hà Nội hết 50 cành",
+                "Hôm qua đi chơi ở Hà Nội hết 100 cành",
+                "Đi vào Đà Nẵng chơi hết 200 cành cuối tuần trước",
+                "Đầu tuần đi ra Hải Phòng đi chơi biển chi phí hết 981 cành",
+                
             ] # trường hợp khó
         ],
         
@@ -37,8 +45,10 @@ CATEGORY_EXAMPLE_MAPPING = {
 SYSTEM_MSG = ("You are a money manager assistant.\n"
                  "These under examples are sentences about spending money of value {value} VND for {subcategory}\n"
                  "Please generate 10 sentences that have value of {value} VND for {subcategory} similar to the examples.\n"
+                 "Note: the sentences must have similar time in the examples.\n"
                  "EXAMPLES:\n{example}")
 USER_MSG = "Similar sentences:\n"
+
 
 SYSTEM_PROMPT = ChatMessage(
     role="system",
@@ -55,7 +65,7 @@ for subcategory, value in CATEGORY_EXAMPLE_MAPPING.items():
             if sample: # tránh list rỗng
                 example = "\n".join(sample)
                 generated_sentences = ""
-                for _ in range(5): # 100 câu
+                for _ in range(20): # 100 câu
                     responses = generic_generate(
                         llm,
                         SYSTEM_PROMPT,
@@ -71,6 +81,7 @@ for subcategory, value in CATEGORY_EXAMPLE_MAPPING.items():
                         if raw_response:
                             response = filter_query(raw_response)
                             generated_sentences += f"{response}\n"
-
+                if not os.path.exists("data/generated"):
+                    os.makedirs("data/generated")
                 with open(f"data/generated/test_{subcategory}_{money_value}_{i}.txt", 'w', encoding="utf-8") as f:
                     f.write(generated_sentences)

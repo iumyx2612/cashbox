@@ -10,7 +10,7 @@ DAY_MAPPING = {
     3: "Thứ năm",
     4: "Thứ sáu",
     5: "Thứ bảy",
-    6: "Chủ nhật"
+    6: "Chủ Nhật"
 }
 
 EXAMPLE = """giải khát công viên cùng bạn hai hôm trước tám trăm

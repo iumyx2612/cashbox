@@ -1,15 +1,20 @@
-import pandas as pd
 import json
-import os
 import sys
 from pathlib import Path    
 sys.path.append(str(Path(__file__).resolve().parents[1]))
+import time
 from openai import OpenAI
-from cores.prompts.gen_json import GEN_FORMAT_SYSTEM_STR, GEN_FORMAT_USER_STR, DAY_MAPPING, EXAMPLE
+from cores.schema.time_tool import calculate_time
+from cores.prompts.gen_json import GEN_FORMAT_USER_STR
 from cores.utils import filter_json_markdown
-from tqdm import tqdm
-import re 
 
+TIME_SYSTEM_PROMPT = """You're a money manager assistant.
+Your job is to provide arguments for the tool below to extract and calculate time information
+Note you must use the tool to calculate the time difference between mentioned date and today.
+
+Tool schema:
+{'name': 'calculate_time', 'description': 'calculate_time(today: Literal[\'Thứ hai\', \'Thứ ba\', \'Thứ tư\', \'Thứ năm\', \'Thứ sáu\', \'Thứ bảy\', \'Chủ Nhật\'], mentioned_date: Optional[Literal[\'Thứ hai\', \'Thứ ba\', \'Thứ tư\', \'Thứ năm\', \'Thứ sáu\', \'Thứ bảy\', \'Chủ Nhật\']] = None, week: Optional[int] = 0, absolute_date: Optional[str] = None, relative_date: Optional[int] = None)', 'parameters': {'properties': {'today': {'enum': ['Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy', 'Chủ Nhật'], 'title': 'Today', 'type': 'string'}, 'mentioned_date': {'anyOf': [{'enum': ['Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy', 'Chủ Nhật'], 'type': 'string'}, {'type': 'null'}], 'default': None, 'title': 'Mentioned Date'}, 'week': {'anyOf': [{'type': 'integer'}, {'type': 'null'}], 'default': 0, 'title': 'Week'}, 'absolute_date': {'anyOf': [{'type': 'string'}, {'type': 'null'}], 'default': None, 'title': 'Absolute Date'}, 'relative_date': {'anyOf': [{'type': 'integer'}, {'type': 'null'}], 'default': None, 'title': 'Relative Date'}}, 'required': ['today'], 'type': 'object'}}}
+"""
 
 BASELINE_SYSTEM_PROMPT = """You're a money manager assistant.
 Your job is to extract necessary cash flow information from provided sentence
@@ -21,58 +26,63 @@ Here's a JSON schema to follow:
 Output a valid JSON object but do not repeat the schema.
 """
 
+# baseline 
 client = OpenAI(
-    base_url="http://10.0.7.50:8012/v1",
+    base_url="http://10.0.4.239:8011/v1",
     api_key="emansieuvc"
 )
+model_name_baseline = '/qwen-baseline-money-v8-category'
 
-# client = OpenAI(
-#     base_url="http://10.0.7.50:8011/v1",
-#     api_key="emansieuvc"
-# )
-model_name = '/qwen-baseline-money-v8-category'
+def predict_baseline(user_prompt: str):
+    completion = client.chat.completions.create(
+    model=model_name_baseline,
+    messages=[
+        {"role": "system", "content": BASELINE_SYSTEM_PROMPT},
+        {"role": "user", "content": user_prompt}
+    ],
+    temperature=0
+    )
+    return filter_json_markdown(completion.choices[0].message.content)
 
-def predict_task_all(sentence: str): 
-    day = "Thứ hai"
-    user_prompt = GEN_FORMAT_USER_STR.format(sentence=sentence, day=day)
-    response = client.chat.completions.create(
+# time
+llm = OpenAI(
+    base_url="http://10.0.4.239:8010/v1",
+    api_key="emansieuvc", 
+)
+model_name = '/qwen-time-function-calling-v2'
+
+def predict_time(user_prompt: str): 
+    response = llm.chat.completions.create(
         model=model_name,
         messages=[
-            {"role": "system", "content": BASELINE_SYSTEM_PROMPT},
+            {"role": "system", "content": TIME_SYSTEM_PROMPT},
             {"role": "user", "content": user_prompt}
         ], 
-        temperature=0
+        temperature=0,
     )
+    
+    time_str = response.choices[0].message.content
+    time_dict = json.loads(filter_json_markdown(time_str)) 
+    time_value_from_tool = calculate_time(**time_dict)
+    return time_value_from_tool, time_str
 
-    return filter_json_markdown(response.choices[0].message.content)
 
-
-df = pd.read_excel('data/data_test/data_test_time.xlsx')
-
-acc = []
-for index, row in tqdm(df.iterrows(), total=df.shape[0]):
-    try: 
-        # Task all
-        sentence = row['Example']
-        baseline_task_str = predict_task_all(sentence)
-        baseline_task_dict = json.loads(baseline_task_str)
-        
-        int_output = int(float(baseline_task_dict['value']))
-        
-        true_value = int(float(str(row['Giá trị'])))
-        if int_output != true_value:
-            print(f"input : {sentence}")
-            print("label: ", true_value)
-            print("output model: ", int_output)
-            print("====================")
-        
-        if int_output == true_value:
-            acc.append(1)
-        else:
-            acc.append(0)
-        df.at[index, 'output'] = int_output
-    except Exception as e:
-        print(e)
-
-if len(acc) > 0:
-    print("Mean: ", sum(acc)/len(acc))
+# sentence = "Sáng hôm qua đã đi vào đà nẵng hết 6 củ"
+# sentence = "Hôm kia đóng tiền điện hết 1 củ ba"
+sentence = "Thứ năm hai tuần trước đi cafe với hội đồng hương Phú Thọ 8 sịch"
+# sentence = "chiều qua mua hai chục hoa hồng 80 cành"
+day = 'Chủ Nhật'
+start = time.time() 
+user_prompt = GEN_FORMAT_USER_STR.format(sentence=sentence, day=day)
+print("User prompt: \n", user_prompt)
+baseline = predict_baseline(user_prompt)
+end_baseline = time.time()
+print("baseline : \n", baseline)
+start_time = time.time()
+time_vlue_from_tool, time_str = predict_time(user_prompt)
+end_time = time.time()
+print("\n\nTime tool : \n", time_str)
+print("time_vlue_from_tool : \n", time_vlue_from_tool)
+print("\n\nTime taken for baseline: ", end_baseline - start)
+print("Time taken for time: ", end_time - start_time)
+print("Time taken for total: ", end_time - start)
