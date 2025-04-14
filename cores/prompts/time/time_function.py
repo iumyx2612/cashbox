@@ -6,7 +6,6 @@ REMEMBER:
 3. If in the sentence mention the absolute date, please use that date in absolute date. Examples: "ngày 13 tháng 12 năm 2023" so absolute date = "13-12", do not include year.
 3. Note that "week" is the number of weeks between mentioned date and today. Because mentioned date is always in the past, so 'week' is always POSITIVE or ZERO
 4. 'Cuối tuần' is 'Chủ Nhật'. 'Đầu tuần' is 'Thứ hai'.
-5. if the 
 You must use the tool to calculate the time difference between mentioned date and today.
 """
 

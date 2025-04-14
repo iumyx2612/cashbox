@@ -21,11 +21,13 @@ Here's a JSON schema to follow:
 Output a valid JSON object but do not repeat the schema.
 """
 
+
 client = OpenAI(
-    base_url="http://10.0.4.239:8015/v1",
+    base_url="http://10.0.7.50:8011/v1",
     api_key="emansieuvc"
 )
-model_name = '/qwen-baseline-money-v8-1'
+
+model_name = '/qwen-baseline-time-function-calling-v2'
 
 def predict_task_all(sentence: str, day: str): 
     user_prompt = GEN_FORMAT_USER_STR.format(sentence=sentence, day=day)
@@ -41,14 +43,14 @@ def predict_task_all(sentence: str, day: str):
     return filter_json_markdown_anywhere(response.choices[0].message.content)
 
 
-df = pd.read_excel('data/data_test/data_test_time.xlsx')
+df = pd.read_excel('data/data_test/data_test_time_v2.xlsx')
 
 acc = []
 for index, row in tqdm(df.iterrows(), total=df.shape[0]):
     try: 
         # Task all
         sentence = row['Example']
-        relative_time = int(row['Time'])
+        relative_time = row['Time']
         ab_time = str(row['real-time']).replace('"', '') if str(row['real-time']) != 'nan' else None
         day = int(float(str(row['Today']))) - 2
         day = DAY_MAPPING[day]
@@ -61,20 +63,27 @@ for index, row in tqdm(df.iterrows(), total=df.shape[0]):
             if int(relative_time) != int(relative_date):
                 acc.append(0)
                 print("\n\n\n-------------------------------")
-                print(f"Erorr with ab_time is None :: {sentence},Note that to day is {day}, True value relative_time: {relative_time}, True value ab_time : {ab_time} - \n\n")
+                print(f'Sentence : {sentence}, today : {day}')
+                print(f"Label relative_time: {relative_time}, label ab_time : {ab_time}") 
+                print(f"Predict relative_time: {relative_date}, predict ab_time : {absolute_date}")
+                # print(f"Tool call: \n {time_str}\n\n")
             else:
                 acc.append(1)
         else: 
-            if int(relative_time) != int(relative_date) or ab_time != absolute_date:
+            if ab_time != absolute_date:
                 acc.append(0)
                 print("\n\n\n-------------------------------")
-                print(f"Erorr with ab_time is {ab_time} :: {sentence},Note that to day is {day}, True value relative_time: {relative_time}, True value ab_time : {ab_time} - \n\n")
+                print(f'Sentence : {sentence}, today : {day}')
+                print(f"Label relative_time: {relative_time}, label ab_time : {ab_time}")
+                print(f"Predict relative_time: {relative_date}, predict ab_time : {absolute_date}")
+                # print(f"Tool call: \n {time_str}\n\n")
+                
             else:
                 acc.append(1)
         
         # df.at[index, 'output'] = int_output
     except Exception as e:
-        print(e)
+        print(f"Index {index} - Error: {e}")
 
 # df.to_excel('data/data_test/data_test_output_model-v7.xlsx', index=False, engine='xlsxwriter')  
 

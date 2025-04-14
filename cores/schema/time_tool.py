@@ -39,7 +39,7 @@ def calculate_time(
     if relative_date:
         return {
             "absolute_date": None,
-            "relative_date": -int(relative_date)
+            "relative_date": -int(relative_date) if relative_date > 0 else int(relative_date),
         }
     if mentioned_date is None:
         mentioned_date = today
