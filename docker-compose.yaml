@@ -9,21 +9,22 @@ services:
     image: vllm/vllm-openai:latest
     container_name: vllm_service
     ports:
-      - "8021:8000"
+      - "8000:8000"
     environment:
-      - MODEL_NAME=${BASELINE__MODEL_NAME}
       - HUGGINGFACE_TOKEN=${HUGGINGFACE__TOKEN}
+      - HF_HOME=/models
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
       - type: bind
-        source: ${MODEL_DIR}
+        source: ${HOME}/.cache/huggingface
         target: /models
-    command: >
-      python3 -m vllm.entrypoints.openai.api_server
-      --model ${MODEL_NAME}
-      --port 8000
-      --host 0.0.0.0
-      --download-dir /models
-
+    command:
+      - --model
+      - anhalu/qwen-baseline-time-function-calling-v2
+      - --port
+      - "8000"
+      - --host
+      - 0.0.0.0
     deploy:
       resources:
         reservations:
@@ -33,7 +34,6 @@ services:
               capabilities: [gpu]
     networks:
       - app-tier
-    
     env_file:
       - .env
 
