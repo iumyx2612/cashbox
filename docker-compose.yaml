@@ -9,7 +9,7 @@ services:
     image: vllm/vllm-openai:latest
     container_name: vllm_service
     ports:
-      - "8000:8000"
+      - "8010:8000"
     environment:
       - HUGGINGFACE_TOKEN=${HUGGINGFACE__TOKEN}
       - HF_HOME=/models

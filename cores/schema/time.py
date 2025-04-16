@@ -7,7 +7,7 @@ class TimeInformation(BaseModel):
         default=None,
         description="Date in dd-mm format. Null if specific date is not mentioned"
     )
-    relative_date: int = Field(
+    relative_date: Optional[int] = Field(
         default=0,
         description="How many days from today to mentioned day. Use default value if not mentioned",
         le=0
