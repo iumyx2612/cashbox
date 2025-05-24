@@ -12,7 +12,7 @@ Output a valid JSON object but do not repeat the schema.
 
 
 client = OpenAI(
-    base_url="http://10.0.4.239:8015/v1",
+    base_url="http://localhost:8010/v1",
     api_key="emansieuvc"
 )
 
@@ -20,9 +20,9 @@ client = OpenAI(
 #     base_url="http://10.0.7.50:8011/v1",
 #     api_key="emansieuvc"
 # )
-model_name = '/qwen-baseline-money-v8-1'
+model_name = 'anhalu/qwen-baseline-time-function-calling-v2'
 
-sentence = "25 tháng 1 chuyển khoản "
+sentence = "hôm nay trời mưa quá"
 day = "Thứ hai"
 GEN_FORMAT_USER_STR = """{sentence}\nNote that today is {day}"""
 

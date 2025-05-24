@@ -25,13 +25,7 @@ services:
       - "8000"
       - --host
       - 0.0.0.0
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
+    gpus: all
     networks:
       - app-tier
     env_file:

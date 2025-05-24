@@ -7,10 +7,12 @@ RUN apt-get update \
 
 RUN pip install --upgrade pip 
 
+# copy cores/requirements.txt to /app/requirements.txt
+COPY cores/requirements.txt /app/requirements.txt
+
+# install requirements
+RUN pip install --no-cache-dir -r /app/requirements.txt --timeout 200
+
 WORKDIR /app
 
 COPY cores/ /app/
-
-
-# Increase timeout to wait for the new installation
-RUN pip install --no-cache-dir -r /app/requirements.txt --timeout 200

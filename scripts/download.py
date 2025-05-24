@@ -1,8 +1,3 @@
-# Use a pipeline as a high-level helper
-from transformers import pipeline
+from huggingface_hub import snapshot_download
 
-messages = [
-    {"role": "user", "content": "Who are you?"},
-]
-pipe = pipeline("text-generation", model="GSAI-ML/LLaDA-8B-Instruct", trust_remote_code=True)
-pipe(messages)
+snapshot_download("anhalu/qwen-baseline-time-function-calling-v2")
