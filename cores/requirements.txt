@@ -5,3 +5,4 @@ structlog==25.1.0
 tqdm==4.67.1
 pydantic-settings==2.8.1
 uvicorn[standard]==0.34.0
+bitsandbytes

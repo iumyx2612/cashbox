@@ -13,22 +13,23 @@ Output a valid JSON object but do not repeat the schema.
 
 client = OpenAI(
     base_url="http://localhost:8010/v1",
-    api_key="emansieuvc"
+    api_key="halu"
 )
 
 # client = OpenAI(
 #     base_url="http://10.0.7.50:8011/v1",
 #     api_key="emansieuvc"
 # )
-model_name = 'anhalu/qwen-baseline-time-function-calling-v2'
 
-sentence = "hôm nay trời mưa quá"
+model_id = '/models/qwen-local'
+print(model_id)
+sentence = "mua đồ siêu thị hết 2 triệu mốt"
 day = "Thứ hai"
 GEN_FORMAT_USER_STR = """{sentence}\nNote that today is {day}"""
 
 
 completion = client.chat.completions.create(
-  model=model_name,
+  model=model_id,
   messages=[
     {"role": "system", "content": BASELINE_SYSTEM_PROMPT},
     {"role": "user", "content": GEN_FORMAT_USER_STR.format(sentence=sentence, day=day)}

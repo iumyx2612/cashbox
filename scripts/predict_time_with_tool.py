@@ -7,6 +7,8 @@ from openai import OpenAI
 from cores.schema.time_tool import calculate_time
 from cores.prompts.gen_json import GEN_FORMAT_USER_STR
 from cores.utils import filter_json_markdown
+import pandas as pd
+from tqdm import tqdm
 
 TIME_SYSTEM_PROMPT = """You're a money manager assistant.
 Your job is to provide arguments for the tool below to extract and calculate time information
@@ -28,10 +30,10 @@ Output a valid JSON object but do not repeat the schema.
 
 # baseline 
 client = OpenAI(
-    base_url="http://10.0.4.239:8011/v1",
-    api_key="emansieuvc"
+    base_url="http://localhost:8010/v1",
+    api_key="halu"
 )
-model_name_baseline = '/qwen-baseline-money-v8-category'
+model_name_baseline = '/models/qwen-local'
 
 def predict_baseline(user_prompt: str):
     completion = client.chat.completions.create(
@@ -42,14 +44,20 @@ def predict_baseline(user_prompt: str):
     ],
     temperature=0
     )
-    return filter_json_markdown(completion.choices[0].message.content)
+    response_str = filter_json_markdown(completion.choices[0].message.content)
+    try:
+        return json.loads(response_str)
+    except json.decoder.JSONDecodeError:
+        # If JSON is invalid, try fixing common formatting issues
+        response_str = response_str.replace("'", '"')  # Replace single quotes with double quotes
+        return json.loads(response_str)
 
 # time
 llm = OpenAI(
-    base_url="http://10.0.4.239:8010/v1",
-    api_key="emansieuvc", 
+    base_url="http://localhost:8010/v1",
+    api_key="halu"
 )
-model_name = '/qwen-time-function-calling-v2'
+model_name = '/models/qwen-local'
 
 def predict_time(user_prompt: str): 
     response = llm.chat.completions.create(
@@ -62,27 +70,127 @@ def predict_time(user_prompt: str):
     )
     
     time_str = response.choices[0].message.content
-    time_dict = json.loads(filter_json_markdown(time_str)) 
+    time_str = filter_json_markdown(time_str)
+    try:
+        time_dict = json.loads(time_str)
+    except json.decoder.JSONDecodeError:
+        # If JSON is invalid, try fixing common formatting issues
+        time_str = time_str.replace("'", '"')  # Replace single quotes with double quotes
+        time_dict = json.loads(time_str)
     time_value_from_tool = calculate_time(**time_dict)
     return time_value_from_tool, time_str
 
+def predict_all(sentence, today): 
+    user_prompt = GEN_FORMAT_USER_STR.format(sentence=sentence, day=today)
+    baseline = predict_baseline(user_prompt)
+    time_value_from_tool, time_str = predict_time(user_prompt)
 
-# sentence = "Sáng hôm qua đã đi vào đà nẵng hết 6 củ"
-# sentence = "Hôm kia đóng tiền điện hết 1 củ ba"
-sentence = "Thứ năm hai tuần trước đi cafe với hội đồng hương Phú Thọ 8 sịch"
-# sentence = "chiều qua mua hai chục hoa hồng 80 cành"
-day = 'Chủ Nhật'
-start = time.time() 
-user_prompt = GEN_FORMAT_USER_STR.format(sentence=sentence, day=day)
-print("User prompt: \n", user_prompt)
-baseline = predict_baseline(user_prompt)
-end_baseline = time.time()
-print("baseline : \n", baseline)
-start_time = time.time()
-time_vlue_from_tool, time_str = predict_time(user_prompt)
-end_time = time.time()
-print("\n\nTime tool : \n", time_str)
-print("time_vlue_from_tool : \n", time_vlue_from_tool)
-print("\n\nTime taken for baseline: ", end_baseline - start)
-print("Time taken for time: ", end_time - start_time)
-print("Time taken for total: ", end_time - start)
+    # update time_value_from_tool to baseline
+    baseline['when'] = time_value_from_tool
+    return baseline
+
+def test(): 
+    sentence = "Sáng nay đi uống cafe với Dũng hết 75k"
+    today = 'Thứ sáu' 
+    baseline = predict_all(sentence=sentence, today=today)
+    print(baseline)
+
+
+def run_test_data():
+    df = pd.read_csv('/home/hoang.minh.an/anhalu-data/learning/cashbox/data/test_new/test_new.csv')
+    failed_cases = pd.DataFrame(
+        columns=['sentence', 'category', 'subcategory', 'value', 'time', 'today', 'predicted', 'predicted_with_tool']
+    )
+    acc_category = 0
+    acc_subcategory = 0
+    acc_value = 0
+    acc_time = 0
+    acc_time_with_tool = 0
+
+    num_run = 0
+    for i, row in tqdm(df.iterrows(), total=len(df)):
+        try: 
+            sentence = row['sentence']
+            today = row['today']
+            category = str(row['category']).lower().strip()
+            subcategory = str(row['subcategory']).lower().strip()
+            value = int(row['value'])
+            time = str(row['time']).lower().strip()
+            if isinstance(time, str) and '?' in time:
+                continue
+            user_prompt = GEN_FORMAT_USER_STR.format(sentence=sentence, day=today)
+            baseline = predict_baseline(user_prompt) 
+            time_value_from_tool, time_str = predict_time(user_prompt)
+            baseline_with_tool = baseline.copy()
+            baseline_with_tool['when'] = time_value_from_tool
+            add_failed_case = False
+            
+            # Check value 
+            if int(baseline['value']) != int(value):
+                add_failed_case = True
+            else:
+                acc_value += 1
+
+            # baseline['category'] is a dictionary : baseline['category'] = {'category': 'subcategory'}
+            # so we need to check if the category is in the dictionary
+            if category not in str(baseline['category'].keys()).lower().strip():
+                add_failed_case = True
+            else:
+                acc_category += 1
+            if subcategory not in str(baseline['category'].values()).lower().strip():
+                add_failed_case = True
+            else:
+                acc_subcategory += 1
+
+
+            # check time without tool
+            if baseline['when']['absolute_date'] != None:
+                #  and str(baseline['when']['absolute_date']).lower().strip() == str(time.strip()) 
+                #  time = '01-31' -> '31-01'
+                time = time.split('-')
+                time = time[1] + '-' + time[0]
+                if str(baseline['when']['absolute_date']).lower().strip() == str(time.strip()):
+                    acc_time += 1
+                else:
+                    add_failed_case = True  
+
+            elif baseline['when']['relative_date'] != None and int(baseline['when']['relative_date']) == int(time):
+                acc_time += 1
+            else:
+                add_failed_case = True
+            
+            # check time with tool
+            if baseline_with_tool['when']['absolute_date'] != None:
+                time = time.split('-')
+                time = time[1] + '-' + time[0]
+                if str(baseline_with_tool['when']['absolute_date']).lower().strip() == str(time.strip()):
+                    acc_time_with_tool += 1
+                else:
+                    add_failed_case = True
+
+            elif baseline_with_tool['when']['relative_date'] != None and int(baseline_with_tool['when']['relative_date']) == int(time):
+                acc_time_with_tool += 1
+            else:
+                add_failed_case = True
+
+            if add_failed_case:
+                failed_cases.loc[i] = [sentence, category, subcategory, value, time, today, baseline, baseline_with_tool]
+            num_run += 1
+
+        except Exception as e:
+            print(f"Error: {e}")
+            continue
+    failed_cases.to_csv('/home/hoang.minh.an/anhalu-data/learning/cashbox/data/test_new/output/failed_cases.csv', index=False)
+    print(f"Accuracy of category: {acc_category/num_run}")
+    print(f"Accuracy of subcategory: {acc_subcategory/num_run}")
+    print(f"Accuracy of value: {acc_value/num_run}")
+    print(f"Accuracy of time: {acc_time/num_run}")
+    print(f"Accuracy of time with tool: {acc_time_with_tool/num_run}")
+    print(f"Total of failed cases: {len(failed_cases)}")
+
+if __name__ == "__main__":
+    run_test_data()
+    # test()
+
+
+

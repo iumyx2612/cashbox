@@ -30,7 +30,7 @@ class BaselinePredictor(BaseModel):
     @cached_property
     def system_prompt(self):
         output_parser = ViPydanticOutputParser(CashFlowInformation)
-        return f"{BASELINE_SYSTEM_STR}\n{output_parser.format_string}"
+        return f"{BASELINE_SYSTEM_STR}{output_parser.format_string}"
     
 
     async def apredict(self, user_prompt) -> CashFlowInformation:

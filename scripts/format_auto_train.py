@@ -9,6 +9,6 @@ from cores.distillation.format_dataset import format_autotrain_sft
 
 
 format_autotrain_sft(
-    'data/data_baseline_v9/baseline_time_function_calling_v1.csv', 
-    'data/data_baseline_v9/baseline_time_function_calling_v1_autotrain.csv'
+    'data/fix_all_data/baseline_time_function_calling_v2.csv', 
+    'data/fix_all_data/baseline_time_function_calling_v2_autotrain.csv'
 )

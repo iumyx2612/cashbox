@@ -104,6 +104,12 @@ class CashCategory(BaseModel):
         default=None,
         description="Money used for income"
     )
+    miscellaneous: Optional[Union[Literal[
+        "Chi phí khác", "Không xác định", "Chi phí phát sinh"
+    ], str]] = Field(
+        default=None,
+        description="Money used for unknown or uncategorized expenses"
+    )
 
     @field_validator('*', mode='before')
     @classmethod
@@ -115,7 +121,7 @@ class CashCategory(BaseModel):
         if field_name in ['food', 'commute', 'health_care', 'living_expense', 'shopping', 
                          'child_care', 'clothing', 'gifts_donations', 'household', 
                          'treat_money', 'pets', 'self_growth', 'bank', 'invest', 
-                         'saving', 'income']:
+                         'saving', 'income', 'miscellaneous']:
             # Get the field's type annotation from the model
             field_type = cls.model_fields[field_name].annotation
             if hasattr(field_type, '__args__'):

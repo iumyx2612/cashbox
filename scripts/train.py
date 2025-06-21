@@ -1,14 +1,14 @@
 import os
 
 # turn of gpu 0 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,2,3"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
 
 from autotrain.params import LLMTrainingParams
 from autotrain.project import AutoTrainProject
 
 
 params = LLMTrainingParams(
-    model="anhalu/qwen-baseline-time-function-calling-v1",
+    model="Qwen/Qwen3-8B",
     # model="qwen-time-function-calling-v2", 
     data_path="dataset",
     chat_template="tokenizer",
@@ -28,11 +28,11 @@ params = LLMTrainingParams(
     scheduler="cosine",
     gradient_accumulation=8,
     merge_adapter=True,
-    project_name="qwen-baseline-time-function-calling-v2",
+    project_name="qwen3-baseline-time-function-calling",
     log="tensorboard",
     # push_to_hub=True,
-    username='anhalu', 
-    token=os.getenv('hf_token'),
+    # username='anhalu', 
+    # token=os.getenv('hf_token'),
 )
 
 
