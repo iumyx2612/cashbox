@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from ..prompts import (
+from prompts import (
     BASELINE_USER_STR
 )
 

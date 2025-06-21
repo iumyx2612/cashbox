@@ -8,19 +8,19 @@ services:
   vllm:
     image: vllm/vllm-openai:latest
     container_name: vllm_service
+    restart: unless-stopped
     ports:
       - "8010:8000"
     environment:
-      - HUGGINGFACE_TOKEN=${HUGGINGFACE__TOKEN}
+      - HUGGINGFACE_HUB_TOKEN=${HUGGINGFACE__TOKEN}    
       - HF_HOME=/models
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
-      - type: bind
-        source: ${HOME}/.cache/huggingface
-        target: /models
+      - ${HOME}/.cache/huggingface:/models
+      - ${HOME}/.huggingface:/root/.huggingface        
     command:
       - --model
-      - anhalu/qwen-baseline-time-function-calling-v2
+      - ${BASELINE__MODEL_NAME}
       - --port
       - "8000"
       - --host
@@ -36,6 +36,7 @@ services:
       context: .
       dockerfile: cores/Dockerfile
     container_name: query_service
+    restart: unless-stopped
     ports:
       - "8020:8020"
     environment:
@@ -47,12 +48,8 @@ services:
       - TIME__PORT=${TIME__PORT}
       - TIME__API_KEY=${TIME__API_KEY}
       - TIME__MODEL_NAME=${TIME__MODEL_NAME}
-    # depends_on:
-    #   - vllm_service
     command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8020"]
-
     networks:
       - app-tier
-    
     env_file:
       - .env
