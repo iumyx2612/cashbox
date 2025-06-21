@@ -5,6 +5,7 @@ networks:
     driver: bridge
 
 services:
+services:
   vllm:
     image: vllm/vllm-openai:latest
     container_name: vllm_service
@@ -12,15 +13,16 @@ services:
     ports:
       - "8010:8000"
     environment:
-      - HUGGINGFACE_HUB_TOKEN=${HUGGINGFACE__TOKEN}    
+      - HUGGINGFACE_TOKEN=${HUGGINGFACE__TOKEN}
       - HF_HOME=/models
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
-      - ${HOME}/.cache/huggingface:/models
-      - ${HOME}/.huggingface:/root/.huggingface        
+      - type: bind
+        source: ${HOME}/.cache/huggingface
+        target: /models
     command:
       - --model
-      - ${BASELINE__MODEL_NAME}
+      - anhalu/qwen-baseline-time-function-calling-v3
       - --port
       - "8000"
       - --host
