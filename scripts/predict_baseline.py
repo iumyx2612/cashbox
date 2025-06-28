@@ -1,4 +1,17 @@
 from openai import OpenAI
+import json
+import sys
+from pathlib import Path    
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+sys.path.append(str(Path(__file__).resolve().parents[1]/'cores'))
+print(sys.path)
+from prompts import BASELINE_SYSTEM_STR
+from utils.BaselineSettings import BaselineSettings
+from output_parser.vi_pydantic import ViPydanticOutputParser
+from schema import CashFlowInformation
+
+# output_parser = ViPydanticOutputParser(CashFlowInformation)
+# BASELINE_SYSTEM_PROMPT = f"{BASELINE_SYSTEM_STR}{output_parser.format_string}"
 
 BASELINE_SYSTEM_PROMPT = """You're a money manager assistant.
 Your job is to extract necessary cash flow information from provided sentence
@@ -21,9 +34,11 @@ client = OpenAI(
 #     api_key="emansieuvc"
 # )
 
-model_id = '/models/qwen-local'
+# get first model id
+model_id = client.models.list().data[0].id
+
 print(model_id)
-sentence = "mua đồ siêu thị hết 2 triệu mốt"
+sentence = "Hôm nay trời đẹp quá"
 day = "Thứ hai"
 GEN_FORMAT_USER_STR = """{sentence}\nNote that today is {day}"""
 

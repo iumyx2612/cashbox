@@ -4,7 +4,8 @@ from .gen_json import (
     GEN_FORMAT_USER_PROMPT,
     GEN_FORMAT_PROMPT,
     DAY_MAPPING, EXAMPLE, 
-    BASELINE_SYSTEM_STR
+    BASELINE_SYSTEM_STR, 
+    TMP_BASELINE_SYSTEM_PROMPT
 )
 
 from .time.time import (

@@ -33,7 +33,8 @@ client = OpenAI(
     base_url="http://localhost:8010/v1",
     api_key="halu"
 )
-model_name_baseline = '/models/qwen-local'
+# get the first model id
+model_name_baseline = client.models.list().data[0].id
 
 def predict_baseline(user_prompt: str):
     completion = client.chat.completions.create(
@@ -57,7 +58,7 @@ llm = OpenAI(
     base_url="http://localhost:8010/v1",
     api_key="halu"
 )
-model_name = '/models/qwen-local'
+model_name = llm.models.list().data[0].id
 
 def predict_time(user_prompt: str): 
     response = llm.chat.completions.create(
@@ -90,7 +91,7 @@ def predict_all(sentence, today):
     return baseline
 
 def test(): 
-    sentence = "Sáng nay đi uống cafe với Dũng hết 75k"
+    sentence = "Hôm nay trời đẹp quá"
     today = 'Thứ sáu' 
     baseline = predict_all(sentence=sentence, today=today)
     print(baseline)
@@ -189,8 +190,8 @@ def run_test_data():
     print(f"Total of failed cases: {len(failed_cases)}")
 
 if __name__ == "__main__":
-    run_test_data()
-    # test()
+    # run_test_data()
+    test()
 
 
 

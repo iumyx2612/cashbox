@@ -10,6 +10,7 @@ from utils import filter_json_markdown
 from schema import Node
 from schema import CashFlowInformation
 from prompts import BASELINE_SYSTEM_STR
+from prompts import TMP_BASELINE_SYSTEM_PROMPT
 from utils.BaselineSettings import BaselineSettings
 from output_parser.vi_pydantic import ViPydanticOutputParser
 from utils.utils import time_decorator
@@ -30,7 +31,8 @@ class BaselinePredictor(BaseModel):
     @cached_property
     def system_prompt(self):
         output_parser = ViPydanticOutputParser(CashFlowInformation)
-        return f"{BASELINE_SYSTEM_STR}{output_parser.format_string}"
+        # return f"{BASELINE_SYSTEM_STR}{output_parser.format_string}"
+        return TMP_BASELINE_SYSTEM_PROMPT
     
 
     async def apredict(self, user_prompt) -> CashFlowInformation:
