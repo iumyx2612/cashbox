@@ -39,7 +39,10 @@ class TimePredictor(BaseModel):
                 {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": user_prompt}
             ],
-            temperature=0
+            temperature=0, 
+            extra_body={ 
+                "chat_template_kwargs": {"enable_thinking": False},
+            },
         )
         content = completion.choices[0].message.content
         content = filter_json_markdown(content)

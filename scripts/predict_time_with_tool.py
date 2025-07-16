@@ -2,6 +2,8 @@ import json
 import sys
 from pathlib import Path    
 sys.path.append(str(Path(__file__).resolve().parents[1]))
+sys.path.append(str(Path(__file__).resolve().parents[1] / 'prompts'))
+print(sys.path)
 import time
 from openai import OpenAI
 from cores.schema.time_tool import calculate_time
@@ -43,9 +45,13 @@ def predict_baseline(user_prompt: str):
         {"role": "system", "content": BASELINE_SYSTEM_PROMPT},
         {"role": "user", "content": user_prompt}
     ],
-    temperature=0
+    temperature=0, 
+    extra_body={ 
+        "chat_template_kwargs": {"enable_thinking": False},
+    },
     )
     response_str = filter_json_markdown(completion.choices[0].message.content)
+    print(response_str)
     try:
         return json.loads(response_str)
     except json.decoder.JSONDecodeError:
@@ -68,6 +74,9 @@ def predict_time(user_prompt: str):
             {"role": "user", "content": user_prompt}
         ], 
         temperature=0,
+        extra_body={ 
+        "chat_template_kwargs": {"enable_thinking": False},
+        },
     )
     
     time_str = response.choices[0].message.content
@@ -91,8 +100,8 @@ def predict_all(sentence, today):
     return baseline
 
 def test(): 
-    sentence = "Hôm nay trời đẹp quá"
-    today = 'Thứ sáu' 
+    sentence = "Hôm qua đi chơi với bạn mất 40 ngàn ăn phở"
+    today = 'Thứ tư' 
     baseline = predict_all(sentence=sentence, today=today)
     print(baseline)
 

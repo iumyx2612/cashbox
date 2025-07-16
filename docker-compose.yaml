@@ -21,7 +21,7 @@ services:
         target: /models
     command:
       - --model
-      - anhalu/qwen-baseline-time-function-calling-v3
+      - anhalu/qwen3-4b-baseline-time-function-calling-v1
       - --port
       - "8000"
       - --host
