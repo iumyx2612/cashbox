@@ -12,7 +12,7 @@ services:
     ports:
       - "8010:8000"
     environment:
-      - HUGGINGFACE_TOKEN=${HUGGINGFACE__TOKEN}
+      - HUGGING_FACE_HUB_TOKEN=${HUGGINGFACE__TOKEN}
       - HF_HOME=/models
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
