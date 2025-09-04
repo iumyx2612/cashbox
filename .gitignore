@@ -17,3 +17,6 @@ model/
 *.model
 *.bin
 *.md
+
+outputs/*
+last_run_prepared/*

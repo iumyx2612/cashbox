@@ -1,0 +1,52 @@
+# Axolotl Configuration File
+base_model: "Qwen/Qwen3-1.7B"  # Use the instruct tuned model, but we're aligning it to be a pirate
+load_in_4bit: true  # set to True for qLoRA
+adapter: "qlora"
+lora_r: 32
+lora_alpha: 64
+lora_target_modules:
+  - "q_proj"
+  - "k_proj"
+  - "v_proj"
+  - "o_proj"  # train self_attn linear modules
+  - "gate_proj"
+  - "down_proj"
+  - "up_proj"  # train MLP linear modules
+lora_qkv_kernel: true  # optimized triton kernels for LoRA
+lora_o_kernel: true
+lora_mlp_kernel: true
+embeddings_skip_upcast: true  # keep embeddings in fp16 so the model fits in 15GB VRAM
+
+plugins:
+  - "axolotl.integrations.cut_cross_entropy.CutCrossEntropyPlugin"
+sample_packing: true  # 2-6x increase in tokens per micro-batch
+# when using packing, use a slightly higher learning rate to account for fewer steps
+# alternatively, reduce the micro_batch_size + gradient_accumulation_steps to achieve closer to the same number of steps/epoch
+learning_rate: 0.0002
+sequence_len: 4096  # larger sequence length improves packing efficiency for more tokens/sec
+micro_batch_size: 8
+gradient_accumulation_steps: 8 
+gradient_checkpointing: true  # tradeoff reduced VRAM for increased time
+gradient_checkpointing_kwargs:
+  use_reentrant: false
+optimizer: "paged_adamw_8bit"
+lr_scheduler: "cosine"
+warmup_steps: 5
+fp16: true
+bf16: false
+max_grad_norm: 0.1  # gradient clipping
+num_epochs: 5
+saves_per_epoch: 2  # how many checkpoints to save over one epoch
+weight_decay: 0.0
+logging_steps: 5
+output_dir: "outputs/qwen3-1.7b-baseline-time-function-calling-v2"
+chat_template: "qwen3"
+datasets:
+  - path: data/update_data/baseline_time_function_calling_v5_no_tools.jsonl
+    type: "chat_template"
+    roles_to_train: ["assistant"]  # default value
+    eot_tokens:
+      - "<|im_end|>"
+dataloader_prefetch_factor: 8  # dataloader optimizations
+dataloader_num_workers: 8
+dataloader_pin_memory: true
